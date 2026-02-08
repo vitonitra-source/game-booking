@@ -9,7 +9,7 @@ app.use(express.json());
 /* ================= DATABASE ================= */
 
 // ВСТАВИШЬ СЮДА ССЫЛКУ ИЗ MONGODB ATLAS ПОЗЖЕ
-mongoose.connect("mongodb+srv://admin:ТВОЙ_ПАРОЛЬ@cluster0.xzkvzwf.mongodb.net/gamebooking?retryWrites=true&w=majority");
+mongoose.connect("mongodb+srv://admin:gamebooking2026@cluster0.xzkvzwf.mongodb.net/gamebooking?retryWrites=true&w=majority");
 
 /* ================= MODELS ================= */
 
