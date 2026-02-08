@@ -1,0 +1,101 @@
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+/* ================= DATABASE ================= */
+
+// ВСТАВИШЬ СЮДА ССЫЛКУ ИЗ MONGODB ATLAS ПОЗЖЕ
+mongoose.connect("mongodb+srv://admin:ТВОЙ_ПАРОЛЬ@cluster0.xzkvzwf.mongodb.net/gamebooking?retryWrites=true&w=majority");
+
+/* ================= MODELS ================= */
+
+const SlotSchema = new mongoose.Schema({
+  date: String,
+  startTime: String,
+  endTime: String,
+  bookedPlayers: { type: Number, default: 0 },
+  gameType: { type: String, default: null },
+  isClosed: { type: Boolean, default: false }
+});
+
+const BookingSchema = new mongoose.Schema({
+  name: String,
+  phone: String,
+  players: Number,
+  gameType: String,
+  slotId: String
+});
+
+const Slot = mongoose.model("Slot", SlotSchema);
+const Booking = mongoose.model("Booking", BookingSchema);
+
+/* ================= SLOT GENERATOR ================= */
+
+function generateSlots(date) {
+  const startHour = 10;
+  const endHour = 22;
+  const duration = 90;
+
+  let current = startHour * 60;
+
+  while (current + duration <= endHour * 60) {
+    const start = `${Math.floor(current / 60)}:${current % 60 === 0 ? "00" : current % 60}`;
+    const endMins = current + duration;
+    const end = `${Math.floor(endMins / 60)}:${endMins % 60 === 0 ? "00" : endMins % 60}`;
+
+    Slot.create({ date, startTime: start, endTime: end });
+    current += duration;
+  }
+}
+
+/* ================= ROUTES ================= */
+
+app.get("/slots/:date", async (req, res) => {
+  const slots = await Slot.find({ date: req.params.date });
+  res.json(slots);
+});
+
+app.post("/generate/:date", async (req, res) => {
+  await Slot.deleteMany({ date: req.params.date });
+  generateSlots(req.params.date);
+  res.json({ message: "Slots created" });
+});
+
+app.post("/book", async (req, res) => {
+  const { slotId, players, gameType, name, phone } = req.body;
+  const slot = await Slot.findById(slotId);
+
+  if (!slot || slot.isClosed)
+    return res.status(400).json({ message: "Termín nie je dostupný" });
+
+  const max = gameType === "laser" ? 12 : 24;
+
+  if (slot.bookedPlayers + players > max)
+    return res.status(400).json({ message: "Nedostatok miest" });
+
+  slot.bookedPlayers += players;
+  slot.gameType = gameType;
+  await slot.save();
+
+  await Booking.create({ name, phone, players, gameType, slotId });
+
+  res.json({ message: "Rezervácia potvrdená" });
+});
+
+app.post("/toggle/:id", async (req, res) => {
+  const slot = await Slot.findById(req.params.id);
+  slot.isClosed = !slot.isClosed;
+  await slot.save();
+  res.json({ message: "OK" });
+});
+
+/* ================= SERVER START ================= */
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log("Server started"));
+
+
