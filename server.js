@@ -11,10 +11,14 @@ app.use(express.json());
 /* ================= DATABASE ================= */
 
 // ВСТАВИШЬ СЮДА ССЫЛКУ ИЗ MONGODB ATLAS ПОЗЖЕ
-mongoose.connect("mongodb+srv://admin:gamebooking2026@cluster0.xzkvzwf.mongodb.net/gamebooking?retryWrites=true&w=majority", {
-useNewUrlParser: true,
-useUnifiedTopology: true
-});
+mongoose.connect(
+"mongodb+srv://admin:gamebooking2026@cluster0.xzkvzwf.mongodb.net/gamebooking?retryWrites=true&w=majority",
+{
+serverSelectionTimeoutMS: 5000
+}
+)
+.then(() => console.log("MongoDB connected"))
+.catch(err => console.log("MongoDB error:", err));
 
 /* ================= MODELS ================= */
 
