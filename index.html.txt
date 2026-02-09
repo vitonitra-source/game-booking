@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+  <meta charset="UTF-8" />
+  <title>Rezervácia hry</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+      color: white;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 25px;
+      max-width: 500px;
+      margin: auto;
+      box-shadow: 0 0 25px rgba(0,0,0,0.4);
+    }
+
+    input, select {
+      width: 90%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    button {
+      padding: 12px 18px;
+      margin: 8px;
+      border-radius: 10px;
+      border: none;
+      background: #00c6ff;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .slot-btn {
+      display: block;
+      width: 100%;
+      background: #ff9800;
+      margin: 6px 0;
+    }
+
+    .full {
+      background: gray;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <h1>🎮 Rezervácia hry</h1>
+
+    <select id="gameType">
+      <option value="laser">🔫 Laser Tag</option>
+      <option value="quest">🧩 Úniková hra</option>
+    </select>
+
+    <input type="date" id="date" />
+    <button onclick="loadSlots()">Zobraziť časy</button>
+
+    <div id="slots"></div>
+  </div>
+
+<script>
+async function loadSlots() {
+  const date = document.getElementById("date").value;
+  const gameType = document.getElementById("gameType").value;
+
+  const res = await fetch(`https://game-booking.onrender.com/slots/${date}`);
+  const slots = await res.json();
+
+  const container = document.getElementById("slots");
+  container.innerHTML = "<h3>Dostupné časy:</h3>";
+
+  slots.forEach(s => {
+    const max = gameType === "laser" ? 12 : 24;
+    const free = max - s.bookedPlayers;
+
+    const btn = document.createElement("button");
+    btn.className = "slot-btn";
+
+    if (free <= 0) {
+      btn.classList.add("full");
+      btn.innerText = `${s.startTime} — Obsadené`;
+      return;
+    }
+
+    btn.innerText = `${s.startTime} — Voľné miesta: ${free}`;
+    btn.onclick = () => book(s._id, gameType);
+    container.appendChild(btn);
+  });
+}
+
+async function book(slotId, gameType) {
+  const name = prompt("Meno:");
+  const phone = prompt("Telefón:");
+  const players = prompt("Počet hráčov:");
+
+  const res = await fetch("https://game-booking.onrender.com/book", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ slotId, name, phone, players: +players, gameType })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+}
+</script>
+</body>
+</html>
+
