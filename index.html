@@ -105,7 +105,7 @@ async function book(slotId, gameType) {
   const name = prompt("Meno:");
   const phone = prompt("Telefón:");
   const players = prompt("Počet hráčov:");
-
+  const res = await fetch(`https://game-booking.onrender.com/slots/${date}`);
   const res = await fetch("https://game-booking.onrender.com/book", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -118,5 +118,6 @@ async function book(slotId, gameType) {
 </script>
 </body>
 </html>
+
 
 
