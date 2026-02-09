@@ -105,51 +105,6 @@ async function book(slotId, gameType) {
   const name = prompt("Meno:");
   const phone = prompt("Telefón:");
   const players = prompt("Počet hráčov:");
-  const res = await fetch(`https://game-booking.onrender.com/slots/${date}`);
-  const res = await fetch("https://game-booking.onrender.com/book", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ slotId, name, phone, players: +players, gameType })
-  });
-
-  const data = await res.json();
-  alert(data.message);
-}
-</script>
-  <script>
-async function loadSlots() {
-  const date = document.getElementById("date").value;
-  const gameType = document.getElementById("gameType").value;
-
-  const res = await fetch(`https://game-booking.onrender.com/slots/${date}`);
-  const slots = await res.json();
-
-  const container = document.getElementById("slots");
-  container.innerHTML = "<h3>Dostupné časy:</h3>";
-
-  slots.forEach(s => {
-    const max = gameType === "laser" ? 12 : 24;
-    const free = max - s.bookedPlayers;
-
-    const btn = document.createElement("button");
-    btn.className = "slot-btn";
-
-    if (free <= 0) {
-      btn.classList.add("full");
-      btn.innerText = `${s.startTime} — Obsadené`;
-      return;
-    }
-
-    btn.innerText = `${s.startTime} — Voľné miesta: ${free}`;
-    btn.onclick = () => book(s._id, gameType);
-    container.appendChild(btn);
-  });
-}
-
-async function book(slotId, gameType) {
-  const name = prompt("Meno:");
-  const phone = prompt("Telefón:");
-  const players = prompt("Počet hráčov:");
 
   const res = await fetch("https://game-booking.onrender.com/book", {
     method: "POST",
@@ -161,11 +116,6 @@ async function book(slotId, gameType) {
   alert(data.message);
 }
 </script>
-
-
 </body>
 </html>
-
-
-
 
