@@ -106,5 +106,31 @@ app.post("/toggle/:id", async (req, res) => {
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log("Server started"));
-//update
+app.get("/generate/:date", async (req, res) => {
+const date = req.params.date;
+
+await Slot.deleteMany({ date });
+
+const startHour = 10;
+const endHour = 22;
+const duration = 90;
+let current = startHour * 60;
+
+while (current + duration <= endHour * 60) {
+const start = `${Math.floor(current / 60)}:${current % 60 === 0 ? "00" : current % 60}`;
+const endMins = current + duration;
+const end = `${Math.floor(endMins / 60)}:${endMins % 60 === 0 ? "00" : endMins % 60}`;
+
+await Slot.create({
+date,
+startTime: start,
+endTime: end
+});
+
+current += duration;
+}
+
+res.send("Slots created");
+});
+
 
